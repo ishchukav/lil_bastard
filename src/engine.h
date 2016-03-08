@@ -1,23 +1,21 @@
 #ifndef ENGINE_H
 #define ENGINE_H
 
+#include "field.h"
 #include <SDL.h>
 #include <SDL_image.h>
 #include <iostream>
-using namespace std;
 
 class Engine {
     public:
         Engine();
         virtual ~Engine();
-        void logSDLError (ostream, const string);
-        SDL_Texture* loadTexture (const string, SDL_Renderer *);
+        void logSDLError (const std::string &);
+        SDL_Texture* loadTexture (const std::string &, SDL_Renderer *);
         void renderTexture(SDL_Texture *, SDL_Renderer *, int, int, int, int);
         void renderTexture(SDL_Texture *, SDL_Renderer *, int, int);
-
-    protected:
-
-    private:
+        int cell_value (Field &, int, int);
+        int run ();
 };
 
 #endif // ENGINE_H
