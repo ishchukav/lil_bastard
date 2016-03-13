@@ -1,5 +1,7 @@
 #include "engine.h"
 #include "cleanup.h"
+#include "player.h"
+#include "spider.h"
 #include <SDL.h>
 #include <string>
 
@@ -75,14 +77,20 @@ int Engine::cell_value(Field &f, int x_pos, int y_pos) {
     // target tile position in field array
     int tile_pos = (x_factor * (y_pos / f.TILE_SIZE)) + x_pos / f.TILE_SIZE;
     // target
-    int value = f.get_cell(tile_pos);
+    int value = f.get_cell_val(tile_pos);
     return value;
 }
 
 
 int Engine::run() {
     // Main window field
-    Field m_window;
+    Field field;
+    // Player character
+    Player player;
+    player.set_tile_size(field.TILE_SIZE);
+    // Spider mob
+    Spider spider;
+    spider.set_rand_xy(field);
 
     // Initializing SDL
     if (SDL_Init(SDL_INIT_VIDEO) != 0) {
@@ -91,8 +99,8 @@ int Engine::run() {
     }
 
     // Creating window
-    SDL_Window *win = SDL_CreateWindow("Li'l bastard", 100, 100, m_window.WIDTH,
-		m_window.HEIGHT, SDL_WINDOW_SHOWN);
+    SDL_Window *win = SDL_CreateWindow("Li'l bastard", 100, 100, field.WIDTH,
+		field.HEIGHT, SDL_WINDOW_SHOWN);
     if (win == nullptr) {
         logSDLError("SDL_CreateWindow");
         SDL_Quit();
@@ -100,83 +108,85 @@ int Engine::run() {
     }
 
     // Creating renderer
-    SDL_Renderer *ren = SDL_CreateRenderer(win, -1,
+    SDL_Renderer *renderer = SDL_CreateRenderer(win, -1,
         SDL_RENDERER_ACCELERATED | SDL_RENDERER_PRESENTVSYNC);
-    if (ren == nullptr) {
+    if (renderer == nullptr) {
         logSDLError("SDL_CreateRenderer");
         cleanup(win);
         SDL_Quit();
         return 1;
     }
 
-    // Loading image "hello.bmp"
-    SDL_Texture *background = loadTexture("img/road.png", ren);
-    SDL_Texture *image = loadTexture("img/man.png", ren);
-    SDL_Texture *wall = loadTexture("img/wall.png", ren);
-    if (background == nullptr || image == nullptr) {
-        cleanup(background, image, wall, win, ren);
+    // Loading textures
+    SDL_Texture *tex_bckgrnd = loadTexture("img/road.png", renderer);
+    SDL_Texture *tex_player = loadTexture(player.get_texture(), renderer);
+    SDL_Texture *tex_wall = loadTexture("img/wall.png", renderer);
+    SDL_Texture *tex_spider = loadTexture(spider.get_texture(), renderer);
+    if (tex_bckgrnd == nullptr || tex_player == nullptr || tex_wall == nullptr ||
+            tex_spider == nullptr) {
+        cleanup(tex_bckgrnd, tex_player, tex_wall, win, renderer);
         IMG_Quit();
         SDL_Quit();
         return 1;
     }
 
     SDL_Event e;
+    SDL_KeyboardEvent kEvent;
     bool quit = false;
-    int x = 0;
-    int y = 0;
 
     while (!quit) {
         while (SDL_PollEvent(&e)) {
-            if (e.type == SDL_QUIT) {
+            kEvent = e.key;
+            if (e.type == SDL_QUIT || kEvent.keysym.scancode == SDL_SCANCODE_ESCAPE)
                 quit = true;
-            }
-            if (e.type == SDL_KEYDOWN) {
-                SDL_KeyboardEvent kEvent = e.key;
-                if (kEvent.keysym.scancode == SDL_SCANCODE_A && x > 0 &&
-                    cell_value(m_window, x - 40, y) != 1)
-                    x -= 40;
-                if (kEvent.keysym.scancode == SDL_SCANCODE_S && y < m_window.HEIGHT - m_window.TILE_SIZE &&
-                    cell_value(m_window, x, y + 40) != 1)
-                    y += 40;
-                if (kEvent.keysym.scancode == SDL_SCANCODE_D && x < m_window.WIDTH - m_window.TILE_SIZE &&
-                    cell_value(m_window, x + 40, y) != 1)
-                    x += 40;
-                if (kEvent.keysym.scancode == SDL_SCANCODE_W && y > 0 &&
-                    cell_value(m_window, x, y - 40) != 1)
-                    y -= 40;
+            if (e.type == SDL_KEYUP) {
+                if (kEvent.keysym.scancode == SDL_SCANCODE_A && player.get_x() > 0 &&
+                        cell_value(field, player.get_x() - field.TILE_SIZE, player.get_y()) != 1)
+                    player.set_x(player.get_x() - field.TILE_SIZE);
+                if (kEvent.keysym.scancode == SDL_SCANCODE_S && player.get_y() < field.HEIGHT - field.TILE_SIZE &&
+                        cell_value(field, player.get_x(), player.get_y() + field.TILE_SIZE) != 1)
+                    player.set_y(player.get_y() + field.TILE_SIZE);
+                if (kEvent.keysym.scancode == SDL_SCANCODE_D && player.get_x() < field.WIDTH - field.TILE_SIZE &&
+                        cell_value(field, player.get_x() + field.TILE_SIZE, player.get_y()) != 1)
+                   player.set_x(player.get_x() + field.TILE_SIZE);
+                if (kEvent.keysym.scancode == SDL_SCANCODE_W && player.get_y() > 0 &&
+                        cell_value(field, player.get_x(), player.get_y() - field.TILE_SIZE) != 1)
+                    player.set_y(player.get_y() - field.TILE_SIZE);
             }
         }
         // Drawing texture
         // Cleaning renderer
-        SDL_RenderClear(ren);
+        SDL_RenderClear(renderer);
 
         // Rendering background
         // Determine how many times we'll ned to fill the screen
-        int xTiles = m_window.WIDTH / m_window.TILE_SIZE;
-        int yTiles = m_window.HEIGHT / m_window.TILE_SIZE;
+        int xTiles = field.WIDTH / field.TILE_SIZE;
+        int yTiles = field.HEIGHT / field.TILE_SIZE;
         // Draw tiles by calculating their position
         for (int i = 0; i < xTiles * yTiles; ++i) {
             int x = i % xTiles;
             int y = i / xTiles;
-            if (m_window.get_cell(i) == 1) {
-                renderTexture(wall, ren, x * m_window.TILE_SIZE, y * m_window.TILE_SIZE,
-                          m_window.TILE_SIZE, m_window.TILE_SIZE);
+            if (field.get_cell_val(i) == 1) {
+                renderTexture(tex_wall, renderer, x * field.TILE_SIZE, y * field.TILE_SIZE,
+                          field.TILE_SIZE, field.TILE_SIZE);
             } else {
-                renderTexture(background, ren, x * m_window.TILE_SIZE, y * m_window.TILE_SIZE,
-                          m_window.TILE_SIZE, m_window.TILE_SIZE);
+                renderTexture(tex_bckgrnd, renderer, x * field.TILE_SIZE, y * field.TILE_SIZE,
+                          field.TILE_SIZE, field.TILE_SIZE);
             }
         }
 
-        // Rendering foreground image
-
-        renderTexture(image, ren, x, y, m_window.TILE_SIZE, m_window.TILE_SIZE);
+        // Rendering player character
+        renderTexture(tex_player, renderer, player.get_x(), player.get_y(), field.TILE_SIZE, field.TILE_SIZE);
+        // Rendering mob Spider
+        renderTexture(tex_spider, renderer, spider.get_x(), spider.get_y(), field.TILE_SIZE, field.TILE_SIZE);
         // Show refreshed screen
-        SDL_RenderPresent(ren);
-        std::cout << x << " " << y << std::endl;
+        SDL_RenderPresent(renderer);
+        player.print_location();
+        spider.print_location();
     }
 
     // Cleaning objects
-    cleanup(background, image, ren, win);
+    cleanup(tex_bckgrnd, tex_player, renderer, win);
     IMG_Quit();
     SDL_Quit();
 

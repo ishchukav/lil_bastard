@@ -1,7 +1,8 @@
 #include "field.h"
+#include <iostream>
+
 
 Field::Field() {
-    //ctor
     grid = {0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 0, 0, 0, 0, 0, 1,
             1, 0, 1, 1, 1, 1, 1, 0, 1, 0, 0, 1, 1, 1, 0, 1,
             1, 0, 0, 0, 0, 0, 1, 0, 1, 1, 1, 1, 0, 1, 0, 1,
@@ -16,10 +17,44 @@ Field::Field() {
             0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0};
 }
 
+
 Field::~Field() {
     //dtor
 }
 
-int Field::get_cell(int cell) {
+
+int Field::get_cell_val(int cell) {
     return grid[cell];
+}
+
+
+int Field::get_cell_x_pixel(int cell) {
+    int row_size = WIDTH / TILE_SIZE;
+    if (cell < 0) {
+        std::cout << "Error: cell is < 0" << std::endl;
+        return -1;
+    } else if (cell >= row_size)
+        return (cell % row_size) * TILE_SIZE;
+    else
+        return cell * TILE_SIZE;
+}
+
+
+int Field::get_cell_y_pixel(int cell) {
+    int row_size = WIDTH / TILE_SIZE;
+    if (cell < 0) {
+        std::cout << "Error: cell is < 0" << std::endl;
+        return -1;
+    } else if (cell == row_size) {
+        return TILE_SIZE;
+    } else if (cell < TILE_SIZE) {
+        return 0;
+    } else {
+        return (cell / row_size) * TILE_SIZE;
+    }
+}
+
+
+int Field::get_cells_amount() {
+    return (WIDTH / TILE_SIZE) * (HEIGHT / TILE_SIZE);
 }
