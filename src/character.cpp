@@ -2,11 +2,16 @@
 #include <iostream>
 
 Character::Character() {
+}
+
+
+Character::Character(Field *f) {
     name = "Charname";
     texture = "img/man.png";
     pos_x = 0;
     pos_y = 0;
     tile_size = 0;
+    field = f;
 }
 
 

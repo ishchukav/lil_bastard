@@ -71,26 +71,15 @@ void Engine::renderTexture(SDL_Texture *tex, SDL_Renderer *ren, int x, int y){
 }
 
 
-int Engine::cell_value(Field &f, int x_pos, int y_pos) {
-    // tiles per line
-    int x_factor = f.WIDTH / f.TILE_SIZE;
-    // target tile position in field array
-    int tile_pos = (x_factor * (y_pos / f.TILE_SIZE)) + x_pos / f.TILE_SIZE;
-    // target
-    int value = f.get_cell_val(tile_pos);
-    return value;
-}
-
-
 int Engine::run() {
     // Main window field
-    Field field;
+    Field *field = new Field;
     // Player character
-    Player player;
-    player.set_tile_size(field.TILE_SIZE);
+    Player player(field);
+    player.set_tile_size(field->TILE_SIZE);
     // Spider mob
-    Spider spider;
-    spider.set_rand_xy(field);
+    Spider spider(field);
+    spider.set_rand_xy();
 
     // Initializing SDL
     if (SDL_Init(SDL_INIT_VIDEO) != 0) {
@@ -99,8 +88,8 @@ int Engine::run() {
     }
 
     // Creating window
-    SDL_Window *win = SDL_CreateWindow("Li'l bastard", 100, 100, field.WIDTH,
-		field.HEIGHT, SDL_WINDOW_SHOWN);
+    SDL_Window *win = SDL_CreateWindow("Li'l bastard", 100, 100, field->WIDTH,
+		field->HEIGHT, SDL_WINDOW_SHOWN);
     if (win == nullptr) {
         logSDLError("SDL_CreateWindow");
         SDL_Quit();
@@ -141,44 +130,48 @@ int Engine::run() {
                 quit = true;
             if (e.type == SDL_KEYUP) {
                 if (kEvent.keysym.scancode == SDL_SCANCODE_A && player.get_x() > 0 &&
-                        cell_value(field, player.get_x() - field.TILE_SIZE, player.get_y()) != 1)
-                    player.set_x(player.get_x() - field.TILE_SIZE);
-                if (kEvent.keysym.scancode == SDL_SCANCODE_S && player.get_y() < field.HEIGHT - field.TILE_SIZE &&
-                        cell_value(field, player.get_x(), player.get_y() + field.TILE_SIZE) != 1)
-                    player.set_y(player.get_y() + field.TILE_SIZE);
-                if (kEvent.keysym.scancode == SDL_SCANCODE_D && player.get_x() < field.WIDTH - field.TILE_SIZE &&
-                        cell_value(field, player.get_x() + field.TILE_SIZE, player.get_y()) != 1)
-                   player.set_x(player.get_x() + field.TILE_SIZE);
+                        field->get_cell_val(player.get_x() - field->TILE_SIZE, player.get_y()) != 1)
+                    player.set_x(player.get_x() - field->TILE_SIZE);
+                if (kEvent.keysym.scancode == SDL_SCANCODE_S && player.get_y() < field->HEIGHT - field->TILE_SIZE &&
+                        field->get_cell_val(player.get_x(), player.get_y() + field->TILE_SIZE) != 1)
+                    player.set_y(player.get_y() + field->TILE_SIZE);
+                if (kEvent.keysym.scancode == SDL_SCANCODE_D && player.get_x() < field->WIDTH - field->TILE_SIZE &&
+                        field->get_cell_val(player.get_x() + field->TILE_SIZE, player.get_y()) != 1)
+                   player.set_x(player.get_x() + field->TILE_SIZE);
                 if (kEvent.keysym.scancode == SDL_SCANCODE_W && player.get_y() > 0 &&
-                        cell_value(field, player.get_x(), player.get_y() - field.TILE_SIZE) != 1)
-                    player.set_y(player.get_y() - field.TILE_SIZE);
+                        field->get_cell_val(player.get_x(), player.get_y() - field->TILE_SIZE) != 1)
+                    player.set_y(player.get_y() - field->TILE_SIZE);
             }
         }
         // Drawing texture
         // Cleaning renderer
         SDL_RenderClear(renderer);
-
         // Rendering background
         // Determine how many times we'll ned to fill the screen
-        int xTiles = field.WIDTH / field.TILE_SIZE;
-        int yTiles = field.HEIGHT / field.TILE_SIZE;
+        int xTiles = field->WIDTH / field->TILE_SIZE;
+        int yTiles = field->HEIGHT / field->TILE_SIZE;
         // Draw tiles by calculating their position
         for (int i = 0; i < xTiles * yTiles; ++i) {
             int x = i % xTiles;
             int y = i / xTiles;
-            if (field.get_cell_val(i) == 1) {
-                renderTexture(tex_wall, renderer, x * field.TILE_SIZE, y * field.TILE_SIZE,
-                          field.TILE_SIZE, field.TILE_SIZE);
+            if (field->get_cell_val(i) == 1) {
+                renderTexture(tex_wall, renderer, x * field->TILE_SIZE, y * field->TILE_SIZE,
+                          field->TILE_SIZE, field->TILE_SIZE);
+                //std::cout << "Wall tex" << i << "loaded" << std::endl;
             } else {
-                renderTexture(tex_bckgrnd, renderer, x * field.TILE_SIZE, y * field.TILE_SIZE,
-                          field.TILE_SIZE, field.TILE_SIZE);
+                renderTexture(tex_bckgrnd, renderer, x * field->TILE_SIZE, y * field->TILE_SIZE,
+                          field->TILE_SIZE, field->TILE_SIZE);
+                //std::cout << "Road tex" << i << "loaded" << std::endl;
             }
         }
 
         // Rendering player character
-        renderTexture(tex_player, renderer, player.get_x(), player.get_y(), field.TILE_SIZE, field.TILE_SIZE);
+        renderTexture(tex_player, renderer, player.get_x(), player.get_y(), field->TILE_SIZE, field->TILE_SIZE);
+        std::cout << "Player tex loaded" << std::endl;
         // Rendering mob Spider
-        renderTexture(tex_spider, renderer, spider.get_x(), spider.get_y(), field.TILE_SIZE, field.TILE_SIZE);
+        spider.move();
+        renderTexture(tex_spider, renderer, spider.get_x(), spider.get_y(), field->TILE_SIZE, field->TILE_SIZE);
+        std::cout << "Spider tex loaded" << std::endl;
         // Show refreshed screen
         SDL_RenderPresent(renderer);
         player.print_location();
@@ -189,6 +182,7 @@ int Engine::run() {
     cleanup(tex_bckgrnd, tex_player, renderer, win);
     IMG_Quit();
     SDL_Quit();
+    delete field;
 
     return 0;
 }

@@ -28,6 +28,16 @@ int Field::get_cell_val(int cell) {
 }
 
 
+int Field::get_cell_val(int x_pos, int y_pos) {
+    // tiles per line
+    int row_size = WIDTH / TILE_SIZE;
+    // target tile position in field array
+    int tile_pos = (row_size * (y_pos / TILE_SIZE)) + x_pos / TILE_SIZE;
+    // target
+    return get_cell_val(tile_pos);
+}
+
+
 int Field::get_cell_x_pixel(int cell) {
     int row_size = WIDTH / TILE_SIZE;
     if (cell < 0) {

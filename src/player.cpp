@@ -1,7 +1,8 @@
 #include "player.h"
 
-Player::Player() {
+Player::Player(Field *f) {
     name = "Vasia";
+    texture = "img/man.png";
 }
 
 

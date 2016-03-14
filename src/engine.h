@@ -14,7 +14,6 @@ class Engine {
         SDL_Texture* loadTexture (const std::string &, SDL_Renderer *);
         void renderTexture(SDL_Texture *, SDL_Renderer *, int, int, int, int);
         void renderTexture(SDL_Texture *, SDL_Renderer *, int, int);
-        int cell_value (Field &, int, int);
         int run ();
 };
 

@@ -8,6 +8,7 @@ class Field {
         Field();
         virtual ~Field();
         int get_cell_val(int);
+        int get_cell_val(int, int);
         int get_cell_x_pixel(int);
         int get_cell_y_pixel(int);
         int get_cells_amount();
