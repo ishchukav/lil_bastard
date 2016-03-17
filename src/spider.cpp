@@ -1,7 +1,7 @@
 #include "spider.h"
-#include <ctime>
-#include <cstdlib>
+#include "engine.h"
 #include <SDL2/SDL.h>
+
 
 Spider::Spider() {
 }
@@ -10,7 +10,6 @@ Spider::Spider() {
 Spider::Spider(Field *f) {
     name = "Spider";
     texture = "img/spider.png";
-    srand(time(NULL));
     tile_size = 40;
     move_time_old = 0;
     move_delay = 1000;
@@ -26,7 +25,7 @@ Spider::~Spider() {
 void Spider::set_rand_xy() {
     bool success = false;
     while (!success) {
-        int cell = rand() % field->get_cells_amount();
+        int cell = random.gen_rand_int(0, field->get_cells_amount() - 1); //dist(rd); //rand() % field->get_cells_amount();
         if (field->get_cell_val(cell) == 0) {
             pos_x = field->get_cell_x_pixel(cell);
             pos_y = field->get_cell_y_pixel(cell);
@@ -43,7 +42,7 @@ void Spider::move() {
         enum direction {UP, DOWN, LEFT, RIGHT};
         int dir;
         while (!success) {
-            dir = rand() % 10;
+            dir = random.gen_rand_int(0, 9);
             switch(dir) {
                 case(UP):
                     if (field->get_cell_val(pos_x, pos_y - tile_size) == 0 && pos_y > 0) {

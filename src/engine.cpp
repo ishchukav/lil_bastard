@@ -6,13 +6,9 @@
 #include <string>
 
 
-Engine::Engine() {
-    //ctor
-}
+Engine::Engine() {}
 
-Engine::~Engine() {
-    //dtor
-}
+Engine::~Engine() {}
 
 // SDL Error Logger
 void Engine::logSDLError (const std::string &msg) {
@@ -64,7 +60,7 @@ void Engine::renderTexture(SDL_Texture *tex, SDL_Renderer *ren, int x, int y, in
 * @param x The x coordinate to draw to
 * @param y The y coordinate to draw to
 */
-void Engine::renderTexture(SDL_Texture *tex, SDL_Renderer *ren, int x, int y){
+void Engine::renderTexture(SDL_Texture *tex, SDL_Renderer *ren, int x, int y) {
 	int w, h;
 	SDL_QueryTexture(tex, NULL, NULL, &w, &h);
 	renderTexture(tex, ren, x, y, w, h);
@@ -77,8 +73,6 @@ int Engine::run() {
     // Player character
     Player player(field);
     player.set_tile_size(field->TILE_SIZE);
-    player.set_x(0);
-    player.set_y(0);
     // Spider mob
     Spider spider(field);
     spider.set_rand_xy();
@@ -177,7 +171,6 @@ int Engine::run() {
         spider.move();
         renderTexture(tex_spider, renderer, spider.get_x(), spider.get_y(), field->TILE_SIZE, field->TILE_SIZE);
         std::cout << "Spider tex loaded" << std::endl;
-
         spider2.move();
         renderTexture(tex_spider, renderer, spider2.get_x(), spider2.get_y(), field->TILE_SIZE, field->TILE_SIZE);
         std::cout << "Spider tex loaded" << std::endl;

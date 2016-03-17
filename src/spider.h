@@ -3,6 +3,7 @@
 
 #include "character.h"
 #include "field.h"
+#include "random.h"
 
 
 class Spider : public Character {
@@ -12,9 +13,9 @@ class Spider : public Character {
         virtual ~Spider();
         void set_rand_xy();
         void move();
-
     private:
         unsigned move_time_old, move_time_curr, move_delay;
+        Random random;
 };
 
 #endif // SPIDER_H

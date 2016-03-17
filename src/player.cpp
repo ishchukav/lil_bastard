@@ -3,6 +3,8 @@
 Player::Player(Field *f) {
     name = "Vasia";
     texture = "img/man.png";
+    pos_x = 0;
+    pos_y = 0;
 }
 
 
