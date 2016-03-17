@@ -1,7 +1,7 @@
 #include "spider.h"
 #include <ctime>
 #include <cstdlib>
-#include <SDL.h>
+#include <SDL2/SDL.h>
 
 Spider::Spider() {
 }

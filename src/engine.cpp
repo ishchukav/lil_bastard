@@ -2,7 +2,7 @@
 #include "cleanup.h"
 #include "player.h"
 #include "spider.h"
-#include <SDL.h>
+#include <SDL2/SDL.h>
 #include <string>
 
 
@@ -77,9 +77,14 @@ int Engine::run() {
     // Player character
     Player player(field);
     player.set_tile_size(field->TILE_SIZE);
+    player.set_x(0);
+    player.set_y(0);
     // Spider mob
     Spider spider(field);
     spider.set_rand_xy();
+
+    Spider spider2(field);
+    spider2.set_rand_xy();
 
     // Initializing SDL
     if (SDL_Init(SDL_INIT_VIDEO) != 0) {
@@ -171,6 +176,10 @@ int Engine::run() {
         // Rendering mob Spider
         spider.move();
         renderTexture(tex_spider, renderer, spider.get_x(), spider.get_y(), field->TILE_SIZE, field->TILE_SIZE);
+        std::cout << "Spider tex loaded" << std::endl;
+
+        spider2.move();
+        renderTexture(tex_spider, renderer, spider2.get_x(), spider2.get_y(), field->TILE_SIZE, field->TILE_SIZE);
         std::cout << "Spider tex loaded" << std::endl;
         // Show refreshed screen
         SDL_RenderPresent(renderer);
