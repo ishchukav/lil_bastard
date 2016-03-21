@@ -68,3 +68,13 @@ int Field::get_cell_y_pixel(int cell) {
 int Field::get_cells_amount() {
     return (WIDTH / TILE_SIZE) * (HEIGHT / TILE_SIZE);
 }
+
+
+std::string Field::get_tex_road() {
+    return tex_road;
+}
+
+
+std::string Field::get_tex_wall() {
+    return tex_wall;
+}

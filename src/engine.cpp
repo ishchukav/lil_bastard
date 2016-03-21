@@ -106,9 +106,9 @@ int Engine::run() {
     }
 
     // Loading textures
-    SDL_Texture *tex_bckgrnd = loadTexture("img/road.png", renderer);
+    SDL_Texture *tex_bckgrnd = loadTexture(field->get_tex_road(), renderer);
     SDL_Texture *tex_player = loadTexture(player.get_texture(), renderer);
-    SDL_Texture *tex_wall = loadTexture("img/wall.png", renderer);
+    SDL_Texture *tex_wall = loadTexture(field->get_tex_wall(), renderer);
     SDL_Texture *tex_spider = loadTexture(spider.get_texture(), renderer);
     if (tex_bckgrnd == nullptr || tex_player == nullptr || tex_wall == nullptr ||
             tex_spider == nullptr) {
