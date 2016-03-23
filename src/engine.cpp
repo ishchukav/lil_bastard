@@ -73,12 +73,13 @@ int Engine::run() {
     // Player character
     Player player(field);
     player.set_tile_size(field->TILE_SIZE);
-    // Spider mob
-    Spider spider(field);
-    spider.set_rand_xy();
-
-    Spider spider2(field);
-    spider2.set_rand_xy();
+    // Spider mobs
+    int mob_amount = 5;
+    Spider *spider[mob_amount]{0};
+    for (int i = 0; i < mob_amount; i++) {
+        spider[i] = new Spider(field);
+        spider[i]->set_rand_xy();
+    }
 
     // Initializing SDL
     if (SDL_Init(SDL_INIT_VIDEO) != 0) {
@@ -109,7 +110,7 @@ int Engine::run() {
     SDL_Texture *tex_bckgrnd = loadTexture(field->get_tex_road(), renderer);
     SDL_Texture *tex_player = loadTexture(player.get_texture(), renderer);
     SDL_Texture *tex_wall = loadTexture(field->get_tex_wall(), renderer);
-    SDL_Texture *tex_spider = loadTexture(spider.get_texture(), renderer);
+    SDL_Texture *tex_spider = loadTexture(spider[0]->get_texture(), renderer);
     if (tex_bckgrnd == nullptr || tex_player == nullptr || tex_wall == nullptr ||
             tex_spider == nullptr) {
         cleanup(tex_bckgrnd, tex_player, tex_wall, win, renderer);
@@ -166,24 +167,22 @@ int Engine::run() {
 
         // Rendering player character
         renderTexture(tex_player, renderer, player.get_x(), player.get_y(), field->TILE_SIZE, field->TILE_SIZE);
-        std::cout << "Player tex loaded" << std::endl;
-        // Rendering mob Spider
-        spider.move();
-        renderTexture(tex_spider, renderer, spider.get_x(), spider.get_y(), field->TILE_SIZE, field->TILE_SIZE);
-        std::cout << "Spider tex loaded" << std::endl;
-        spider2.move();
-        renderTexture(tex_spider, renderer, spider2.get_x(), spider2.get_y(), field->TILE_SIZE, field->TILE_SIZE);
-        std::cout << "Spider tex loaded" << std::endl;
+        // Rendering mobs Spider
+        for (int i = 0; i < mob_amount; i++) {
+            spider[i]->move();
+            renderTexture(tex_spider, renderer, spider[i]->get_x(), spider[i]->get_y(), field->TILE_SIZE, field->TILE_SIZE);
+        }
         // Show refreshed screen
         SDL_RenderPresent(renderer);
-        player.print_location();
-        spider.print_location();
     }
 
     // Cleaning objects
     cleanup(tex_bckgrnd, tex_player, renderer, win);
     IMG_Quit();
     SDL_Quit();
+    for (int i = 0; i < mob_amount; i++) {
+        delete spider[i];
+    }
     delete field;
 
     return 0;
