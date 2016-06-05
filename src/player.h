@@ -8,9 +8,6 @@ class Player : public Character {
     public:
         Player();
         ~Player();
-
-    private:
-
 };
 
 #endif // PLAYER_H

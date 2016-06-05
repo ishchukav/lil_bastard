@@ -5,7 +5,7 @@
 class Random {
     public:
         Random();
-        virtual ~Random();
+        ~Random();
         int gen_rand_int(int, int);
 };
 

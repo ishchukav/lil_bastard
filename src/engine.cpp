@@ -75,7 +75,7 @@ int Engine::run() {
     player.set_tile_size(field.TILE_SIZE);
     // Spider mobs
     int mob_amount = 5;
-    Spider *spider[mob_amount]{0};
+    Mob *spider[mob_amount]{0};
     for (int i = 0; i < mob_amount; i++) {
         spider[i] = new Spider(&field);
         spider[i]->set_rand_xy();
@@ -169,15 +169,25 @@ int Engine::run() {
         renderTexture(tex_player, renderer, player.get_x(), player.get_y(), field.TILE_SIZE, field.TILE_SIZE);
         // Rendering mobs Spider
         for (int i = 0; i < mob_amount; i++) {
-            // killing mobs if player & mob are at the same pisition
+            // fight test
             if (player.get_x() == spider[i]->get_x() && player.get_y() == spider[i]->get_y()) {
-                --mob_amount;
-                if (i < mob_amount) {
-                    Spider *tmp = spider[i];
-                    spider[i] = spider[mob_amount];
-                    spider[mob_amount] = tmp;
+                player.attack(spider[i]);
+                if (spider[i]->get_health() <= 0) {
+                    --mob_amount;
+                    if (i < mob_amount) {
+                        Mob *tmp = spider[i];
+                        spider[i] = spider[mob_amount];
+                        spider[mob_amount] = tmp;
+                    }
+                    delete spider[mob_amount];
+                    std::cout << "Spider " << i << " is dead now.\n";
+                } else {
+                    spider[i]->attack(&player);
+                    if(player.get_health() <= 0) {
+                        std::cout << "GAME OVER!!!\n";
+                        return 0;
+                    }
                 }
-                delete spider[mob_amount];
             }
             else {
                 spider[i]->move();
