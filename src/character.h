@@ -1,14 +1,12 @@
 #ifndef CHARACTER_H
 #define CHARACTER_H
 
-#include "field.h"
 #include <string>
 
 class Character {
     public:
         Character();
-        Character(Field *);
-        virtual ~Character();
+        ~Character();
         std::string get_texture();
         std::string get_name();
         int get_x();
@@ -24,7 +22,6 @@ class Character {
         int pos_x;
         int pos_y;
         int tile_size;
-        Field *field;
 };
 
 #endif // CHARACTER_H

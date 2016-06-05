@@ -7,8 +7,7 @@
 class Player : public Character {
     public:
         Player();
-        Player(Field *);
-        virtual ~Player();
+        ~Player();
 
     private:
 

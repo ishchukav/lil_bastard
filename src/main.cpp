@@ -1,9 +1,8 @@
 #include "engine.h"
 
 int main (int argc, char* argv[]) {
-    Engine *engine = new Engine();
-    engine->run();
-    delete engine;
+    Engine engine;
+    engine.run();
 
     return 0;
 }
