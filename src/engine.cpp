@@ -75,7 +75,7 @@ int Engine::run() {
     player.set_tile_size(field.TILE_SIZE);
     // Spider mobs
     int mob_amount = 5;
-    Mob *spider[mob_amount]{0};
+    Mob *spider[mob_amount];
     for (int i = 0; i < mob_amount; i++) {
         spider[i] = new Spider(&field);
         spider[i]->set_rand_xy();
